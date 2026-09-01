@@ -7,6 +7,9 @@ class AESCypher:
     Cypher class.
     """
     def __init__(self, key: bytes):
+        """
+        :param key: Some bytes (hash is recommended) for using encrypt-decrypt AES-GCM protocol.
+        """
         if len(key) not in {16, 24, 32}:
             raise ValueError("Key must be 16, 24 or 32 bytes long")
         self.key = key
@@ -16,7 +19,7 @@ class AESCypher:
         """
         Encrypt some plain text.
         :param plaintext:
-        :param associated_data:
+        :param associated_data: Associated data can be used as unencrypted data for integrity or context.
         :return:
         """
         nonce = os.urandom(12)  # Number used once to ensure that each message is unique. This must be random.
@@ -26,7 +29,7 @@ class AESCypher:
         """
         Decrypt bytes to plaintext.
         :param data:
-        :param associated_data:
+        :param associated_data: If associated data was used for encrypt, use the same.
         :return:
         """
         nonce = data[:12]  # First 12 bytes are nonce (see encrypt function).
