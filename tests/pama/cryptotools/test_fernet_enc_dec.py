@@ -2,6 +2,8 @@ import hashlib
 import os
 import unittest
 
+from cryptography.fernet import InvalidToken
+
 from pama.cryptotools import fernet_enc_dec
 
 
@@ -12,6 +14,7 @@ class TestFernetEncDec(unittest.TestCase):
         key_bytes = hashlib.sha256(key_str.encode("utf-8")).digest()
 
         enc_dec = fernet_enc_dec.FernetEncDecrypt(key=key_bytes, salt=salt)
+        other_enc_dec = fernet_enc_dec.FernetEncDecrypt(key=b"other key", salt=salt)
 
         # Use fernet_enc_dec for encrypt.
         text = "Text to encrypt"
@@ -21,5 +24,7 @@ class TestFernetEncDec(unittest.TestCase):
         # And use aes_cypher for decrypt
         self.assertEqual(enc_dec.decrypt(cyphered).decode("utf-8"), text)
 
+        with self.assertRaises(InvalidToken):
+            other_enc_dec.decrypt(cyphered).decode("utf-8")
 
 
