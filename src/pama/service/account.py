@@ -1,9 +1,17 @@
 from typing import Sequence
 
+from pama.cryptotools import fernet_enc_dec
+from pama.exceptions.service import ServiceError
 from pama.models.account import Account, AccountUpdate
 from pama.data import account as data
 
+enc_dec: None | fernet_enc_dec.FernetEncDecrypt = None
+
 async def create_account(account: Account) -> Account:
+    if enc_dec is not None:
+        account.password = enc_dec.encrypt(account.password)
+    else:
+        raise ServiceError(msg="Enc / Dec is not set.")
     return await data.create_account(account=account)
 
 async def update_account(account_update: AccountUpdate) -> Account:
@@ -16,3 +24,12 @@ async def search_account(name: str | None = None, comments: str | None = None,
                          url: str | None = None, limit: int | None = None, offset: int | None = None) -> Sequence[Account]:
     return await search_account(name=name, comments=comments, url=url, limit=limit, offset=offset)
 
+def set_encoder(key: bytes, salt: bytes):
+    global enc_dec
+    enc_dec = fernet_enc_dec.FernetEncDecrypt(key=key, salt=salt)
+
+def decode_pw(encoded: bytes) -> str:
+    if enc_dec is not None:
+        return enc_dec.decrypt(encoded).decode("utf-8")
+    else:
+        raise ServiceError(msg="Enc / Dec is not set.")
