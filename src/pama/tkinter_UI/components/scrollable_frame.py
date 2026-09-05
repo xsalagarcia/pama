@@ -3,6 +3,8 @@ from tkinter import ttk
 
 class ScrollableFrame(tk.Canvas):
     """
+    Canvas class that wraps tkinter's Canvas class and adds scrollbar to it.
+
     Components should be inserted into ScrollableFrame.scrollable_content
     """
     def __init__(self, parent, *args, **kwargs):

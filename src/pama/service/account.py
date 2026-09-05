@@ -1,3 +1,4 @@
+import asyncio
 from typing import Sequence
 
 from pama.cryptotools import fernet_enc_dec
@@ -9,7 +10,7 @@ enc_dec: None | fernet_enc_dec.FernetEncDecrypt = None
 
 async def create_account(account: Account) -> Account:
     if enc_dec is not None:
-        account.password = enc_dec.encrypt(account.password)
+        account.passw = enc_dec.encrypt(account.passw)
     else:
         raise ServiceError(msg="Enc / Dec is not set.")
     return await data.create_account(account=account)
@@ -22,7 +23,7 @@ async def remove_account(account_id: int):
 
 async def search_account(name: str | None = None, comments: str | None = None,
                          url: str | None = None, limit: int | None = None, offset: int | None = None) -> Sequence[Account]:
-    return await search_account(name=name, comments=comments, url=url, limit=limit, offset=offset)
+    return await data.search_account(name=name, comments=comments, url=url, limit=limit, offset=offset)
 
 def set_encoder(key: bytes, salt: bytes):
     global enc_dec
@@ -33,3 +34,9 @@ def decode_pw(encoded: bytes) -> str:
         return enc_dec.decrypt(encoded).decode("utf-8")
     else:
         raise ServiceError(msg="Enc / Dec is not set.")
+
+async def test_async(error: bool):
+    if error:
+        raise ServiceError(msg="Error raised.")
+    await asyncio.sleep(1)
+    print("tested")

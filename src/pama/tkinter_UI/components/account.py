@@ -4,13 +4,27 @@ import tkinter as tk
 from pama import tkinter_UI
 from pama.models.account import Account
 from pama.tkinter_UI.validators import validators
+from pama.service import account as service
 
 
 class AccountFrame(ttk.Frame):
+    """
+    Widget representing an account.
+    """
+
     def __init__(self, parent, account: Account, auto_pack: bool = True, *args, **kwargs):
+        """
+
+        :param parent:
+        :param account: Account data.
+        :param auto_pack: If true, automatically pack the component. Defaults to True.
+        :param args:
+        :param kwargs:
+        """
         super().__init__(parent, *args, **kwargs)
 
         self.account = account
+        """Account data."""
 
 
         # Account fields
@@ -42,8 +56,10 @@ class AccountFrame(ttk.Frame):
         # Component buttons
         buttons_frame = ttk.Frame(self)
         buttons_frame.pack(side="top")
-        ttk.Button(buttons_frame, text="Copy PW").grid(row=0, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        ttk.Button(buttons_frame, text="Copy PW", command=self._copy_pw
+                   ).grid(row=0, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
         ttk.Button(buttons_frame, text="Show PW").grid(row=0, column=2, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        ttk.Button(buttons_frame, text="Change PW").grid(row=0, column=3, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
         ttk.Button(self, text="Delete account").pack(side="top", padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
@@ -51,6 +67,14 @@ class AccountFrame(ttk.Frame):
 
         if auto_pack:
             self.pack()
+
+    def _copy_pw(self):
+        """
+        Clear the clipboard. Copy pw to the clipboard.
+        :return:
+        """
+        self.master.clipboard_clear()
+        self.master.clipboard_append(service.enc_dec.decrypt(self.account.passw).decode("utf-8"))
 
     def filter_with(self, filter: str):
         """
