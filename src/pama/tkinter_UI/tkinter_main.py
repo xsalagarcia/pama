@@ -46,13 +46,16 @@ class TkinterAsyncApp(tk.Tk):
         validators.create_validators(self)
         self.title("PaMa")
 
+        # Register the window close handler
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
         head_options = HeadOptions(self)
         head_options.pack(side="top", fill="x", anchor=tk.CENTER)
 
         self.accounts_scrollable_frame = ScrollableFrame(self)
         self.accounts_scrollable_frame.pack()
 
-        self.afs = list[AccountFrame]
+        self.afs = list[AccountFrame]()
         """Contains AccountFrame widgets with accounts."""
 
         #test_accounts = [Account(name=f"{i}test", comments=f"{i}test comments", url=f"{i}test url", passw=b"") for i in range(1, 20)]
@@ -93,7 +96,33 @@ class TkinterAsyncApp(tk.Tk):
         self.async_loop.run_forever()
 
     def on_close(self):
+        """
+        Called when the app is closed.
+        Gracefully wait for remaining async tasks to complete.
+        :return:
+        """
+
         # If a ProcessPool is set, it should be shutdown here.
+
+
+        async def _shutdown():
+            """
+            Await all running tasks to complete.
+            :return:
+            """
+            async_tasks = [t for t in asyncio.all_tasks(self.async_loop) if t is not asyncio.current_task(self.async_loop)]
+            if async_tasks:
+                await asyncio.gather(*async_tasks, return_exceptions=True)
+
+        future = asyncio.run_coroutine_threadsafe(_shutdown(), self.async_loop)
+        try:
+            future.result(timeout=10)
+        except Exception as e:
+            print(f"Error during async shutdown: {e}")
+        finally:
+            self.async_loop.call_soon_threadsafe(self.async_loop.stop)
+
+        self.daemon_for_async_tasks.join(timeout=5)
         self.destroy()
 
     def filter_accounts(self, filter):
