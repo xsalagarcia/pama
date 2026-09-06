@@ -2,7 +2,9 @@ from tkinter import ttk, messagebox
 import tkinter as tk
 
 from pama import tkinter_UI
+from pama.exceptions.service import ServiceError
 from pama.models.account import Account
+from pama.service import account as service
 from pama.tkinter_UI.validators import validators
 
 
@@ -10,10 +12,10 @@ class NewAccountDialog(tk.Toplevel):
     """
     Toplevel dialog for creating a new account.
     """
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, title="New Account", account: None | Account = None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.result: None | Account = None
-        self.title("New Account")
+        self.title(title)
         self.resizable(False, False)
         self.transient(parent)  # On top.
         self.grab_set()  # Modal.
@@ -24,6 +26,18 @@ class NewAccountDialog(tk.Toplevel):
         self._account_pw = tk.StringVar()
         self._account_pw_c = tk.StringVar()
         self._is_pw_visible = tk.BooleanVar()
+
+        if account is not None:
+            try:
+                pw = service.enc_dec.decrypt(account.passw).decode("utf-8")
+            except ServiceError as e:
+                tk.messagebox.showerror("Error", e.msg)
+                self._cancel()
+            self._account_name.set(account.name)
+            self._account_comments.set(account.comments)
+            self._account_url.set(account.url)
+            self._account_pw.set(pw)
+            self._account_pw_c.set(pw)
 
         frame_form = ttk.Frame(self, padding=tkinter_UI.PAD)
         frame_form.grid(row=2, column=2, sticky=(tk.E, tk.W), columnspan=2)
