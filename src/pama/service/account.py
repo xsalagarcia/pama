@@ -13,13 +13,18 @@ async def create_account(account: Account) -> Account:
         account.passw = enc_dec.encrypt(account.passw)
     else:
         raise ServiceError(msg="Enc / Dec is not set.")
-    return await data.create_account(account=account)
+    await data.create_account(account=account)
+    return account
 
 async def update_account(account_update: AccountUpdate) -> Account:
+    if account_update.passw is not None:
+        if enc_dec is None:
+            raise ServiceError(msg="Enc / Dec is not set.")
+        account_update.passw = enc_dec.encrypt(account_update.passw)
     return await data.update_account(account_update=account_update)
 
-async def remove_account(account_id: int):
-    await data.remove_account(account_id=account_id)
+async def remove_account(account_id: int) -> int:
+    return await data.remove_account(account_id=account_id)
 
 async def search_account(name: str | None = None, comments: str | None = None,
                          url: str | None = None, limit: int | None = None, offset: int | None = None) -> Sequence[Account]:

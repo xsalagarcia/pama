@@ -1,8 +1,10 @@
 import asyncio
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter as tk
 
 from pama import tkinter_UI
+from pama.cryptotools.fernet_enc_dec import FernetEncDecrypt
+from pama.models import account
 from pama.models.account import Account, AccountUpdate
 from pama.tkinter_UI.components.new_account_dialog import NewAccountDialog
 from pama.tkinter_UI.validators import validators
@@ -66,19 +68,49 @@ class AccountFrame(ttk.Frame):
         buttons_frame.pack(side="top")
         ttk.Button(buttons_frame, text="Copy PW", command=self._copy_pw
                    ).grid(row=0, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
-        ttk.Button(buttons_frame, text="Show PW").grid(row=0, column=2, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        ttk.Button(buttons_frame, text="Show PW", command=self._show_pw
+                   ).grid(row=0, column=2, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
         ttk.Button(buttons_frame, text="Edit", command=self._edit).grid(row=0, column=3, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
-        ttk.Button(self, text="Delete account").pack(side="top", padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        ttk.Button(self, text="Delete account", command=self._delete
+                   ).pack(side="top", padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
         ttk.Separator(self).pack(fill="x")
 
         if auto_pack:
             self.pack()
 
+    def __eq__(self, other: object):
+        if not isinstance(other, AccountFrame):
+            return NotImplemented
+        return self.account.name == other.account.name
+
+    def __lt__(self, other: object):
+        if not isinstance(other, AccountFrame):
+            return NotImplemented
+        return self.account.name < other.account.name
+
+    def __gt__(self, other: object):
+        if not isinstance(other, AccountFrame):
+            return NotImplemented
+        return self.account.name > other.account.name
+
+    def _show_pw(self):
+        """
+        Show a messagebox with pw.
+        :return:
+        """
+        messagebox.showinfo(title=f"PW for {self.account.name}",
+                            message=service.enc_dec.decrypt(self.account.passw).decode("utf-8"))
+
+    def _delete(self):
+        if messagebox.askyesno("Confirm", "Are you sure you want to delete this account?"):
+            self.winfo_toplevel().remove_account(self)
+
     def _edit(self):
         """
-        Open modal dialog to edit account.
+        Open modal dialog to edit account. When destroyed, if NewAccountDialog result is not None,
+        update at database. When successfully updated at database, update the component calling self.update_account().
         :return:
         """
         nac = NewAccountDialog(self, title="Edit account", account=self.account)
@@ -94,12 +126,20 @@ class AccountFrame(ttk.Frame):
         nac.bind("<Destroy>", lambda event: update_account_at_database() if event.widget == nac else None)
 
     def update_account(self, updated_account: Account):
+        """
+        Update self.account with new values.
+        :param updated_account:
+        :return:
+        """
         if isinstance(updated_account, Account):
+            has_to_reorder = self.account.name != updated_account.name
             self.account = updated_account
             self.name_variable.set(self.account.name)
             self.comments_variable.set(self.account.comments)
             self.url_variable.set(self.account.url)
             self.last_updated_variable.set(self.account.last_updated.isoformat(sep=" "))
+            if has_to_reorder:
+                self.winfo_toplevel().reorder_account(af=self)
         else:
             tk.messagebox.showerror(title="Error", message="Error updating account.")
 
@@ -122,3 +162,7 @@ class AccountFrame(ttk.Frame):
             self.pack_forget()
         else:
             self.pack()
+
+    def move_after(self, widget):
+        self.pack_forget()
+        self.pack(after=widget)

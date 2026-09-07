@@ -5,6 +5,8 @@ import tkinter as tk
 
 from pama import tkinter_UI
 from pama.exceptions.service import ServiceError
+from pama.models.account import Account
+from pama.tkinter_UI.components.account import AccountFrame
 from pama.tkinter_UI.components.ask_keymaster_dialog import AskKeymasterDialog
 from pama.tkinter_UI.components.new_account_dialog import NewAccountDialog
 from pama.service import account as service
@@ -37,10 +39,14 @@ class HeadOptions(ttk.Frame):
 
     def show_new_account_dialog(self):
         new_account_dialog = NewAccountDialog(self)
+
+        def insert_new_account_frame(account: Account):
+            self.winfo_toplevel().create_and_insert_ordered_account_frame(account=account)
+
         def create_new_account():
             if new_account_dialog.result is not None:
                 future = asyncio.run_coroutine_threadsafe(service.create_account(new_account_dialog.result), self.master.async_loop)
-                future.add_done_callback(lambda _ : print(future.result()))
+                future.add_done_callback(lambda f : insert_new_account_frame(f.result()) if f.result() else None)
 
 
             """

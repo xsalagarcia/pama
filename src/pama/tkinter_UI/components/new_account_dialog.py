@@ -10,7 +10,7 @@ from pama.tkinter_UI.validators import validators
 
 class NewAccountDialog(tk.Toplevel):
     """
-    Toplevel dialog for creating a new account.
+    Toplevel dialog for creating a new account. If user press OK, result will be an Account object, if not, None.
     """
     def __init__(self, parent, title="New Account", account: None | Account = None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)

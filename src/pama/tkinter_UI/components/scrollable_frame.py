@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk
 
@@ -28,7 +29,14 @@ class ScrollableFrame(tk.Canvas):
         self.bind("<Configure>", self._on_canvas_configure)
 
         # 5. Enable mouse wheel scrolling
-        self.bind_all("<MouseWheel>", self._on_mousewheel)
+        if sys.platform.startswith("linux"):
+            # Linux bindings
+            self.bind_all("<Button-4>", self._on_mousewheel)
+            self.bind_all("<Button-5>", self._on_mousewheel)
+        else:
+            # Windows and macOS binding
+            self.bind_all("<MouseWheel>", self._on_mousewheel)
+
 
     def _on_canvas_configure(self, event):
         """Adjusts inner frame width to match the canvas window width."""
@@ -36,7 +44,18 @@ class ScrollableFrame(tk.Canvas):
 
     def _on_mousewheel(self, event):
         """Handles cross-platform mousewheel scrolling."""
-        self.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        if sys.platform == "darwin":
+            # macOS returns delta directly
+            self.yview_scroll(-1 * event.delta, "units")
+        elif sys.platform == "win32":
+            # Windows returns delta in multiples of 120
+            self.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        else:
+            # Linux uses Button-4 (up) and Button-5 (down)
+            if event.num == 4:
+                self.yview_scroll(-1, "units")
+            elif event.num == 5:
+                self.yview_scroll(1, "units")
 
     def pack(self, **kwargs):
         """Helper to auto-pack both canvas and scrollbar together."""
