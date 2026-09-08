@@ -32,7 +32,7 @@ class AskKeymasterDialog(tk.Toplevel):
         ttk.Button(self, text="OK", command=self._ok).pack(side="top", padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
     def _ok(self, event=None):
-        service.set_encoder(key=hashlib.sha256(self._key_master.get().encode("utf-8")).digest(), salt=config.salt)
+        service.set_encoder(key=self._key_master.get(), salt=config.salt)
         self.destroy()
 
 

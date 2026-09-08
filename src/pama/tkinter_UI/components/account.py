@@ -3,8 +3,6 @@ from tkinter import ttk, messagebox
 import tkinter as tk
 
 from pama import tkinter_UI
-from pama.cryptotools.fernet_enc_dec import FernetEncDecrypt
-from pama.models import account
 from pama.models.account import Account, AccountUpdate
 from pama.tkinter_UI.components.new_account_dialog import NewAccountDialog
 from pama.tkinter_UI.validators import validators

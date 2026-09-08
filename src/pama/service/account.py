@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 from typing import Sequence
 
 from pama.cryptotools import fernet_enc_dec
@@ -30,9 +31,9 @@ async def search_account(name: str | None = None, comments: str | None = None,
                          url: str | None = None, limit: int | None = None, offset: int | None = None) -> Sequence[Account]:
     return await data.search_account(name=name, comments=comments, url=url, limit=limit, offset=offset)
 
-def set_encoder(key: bytes, salt: bytes):
+def set_encoder(key: str, salt: bytes):
     global enc_dec
-    enc_dec = fernet_enc_dec.FernetEncDecrypt(key=key, salt=salt)
+    enc_dec = fernet_enc_dec.FernetEncDecrypt(key=hashlib.sha256(key.encode("utf-8")).digest(), salt=salt)
 
 def decode_pw(encoded: bytes) -> str:
     if enc_dec is not None:
