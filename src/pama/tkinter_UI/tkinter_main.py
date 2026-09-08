@@ -55,8 +55,6 @@ class TkinterAsyncApp(tk.Tk):
         self.accounts_scrollable_frame = ScrollableFrame(self)
         self.accounts_scrollable_frame.pack()
 
-        self.afs = list[AccountFrame]()
-        """Contains AccountFrame widgets with accounts."""
 
         #test_accounts = [Account(name=f"{i}test", comments=f"{i}test comments", url=f"{i}test url", passw=b"") for i in range(1, 20)]
         #self.afs = [AccountFrame(scrollable.scrollable_content, account) for account in test_accounts]
@@ -154,7 +152,7 @@ class TkinterAsyncApp(tk.Tk):
         self.destroy()
 
     def filter_accounts(self, filter):
-        for af in self.afs:
+        for af in self.get_account_frames_list():
             af.filter_with(filter)
 
 def main():

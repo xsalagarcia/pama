@@ -1,7 +1,7 @@
 [project]
 name = "pama"
 version = "0.1.0"
-description = "Add your description here"
+description = "Accs manager"
 readme = "README.md"
 authors = [
     { name = "xsalagarcia", email = "xsalagarcia@gmail.com" }

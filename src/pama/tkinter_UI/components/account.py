@@ -156,6 +156,8 @@ class AccountFrame(ttk.Frame):
         :param filter:
         :return:
         """
+        if filter.strip() == "":
+            self.pack()
         if filter not in self.account.name and filter not in self.account.comments and filter not in self.account.url:
             self.pack_forget()
         else:

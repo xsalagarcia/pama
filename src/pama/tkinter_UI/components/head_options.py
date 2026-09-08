@@ -36,6 +36,10 @@ class HeadOptions(ttk.Frame):
         self.search_content: tk.StringVar = tk.StringVar()
         """Search content"""
         ttk.Entry(self, textvariable=self.search_content).pack(side="bottom", fill="x", expand=True, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        self.search_content.trace_add("write", self.filter_by_text)
+
+    def filter_by_text(self, a, b, c):
+        self.winfo_toplevel().filter_accounts(self.search_content.get())
 
     def show_new_account_dialog(self):
         new_account_dialog = NewAccountDialog(self)

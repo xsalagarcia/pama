@@ -1,8 +1,6 @@
 import unittest
 
 from sqlmodel import SQLModel, Field
-
-from pama.models.account import Account
 from pama.utils.validator import is_valid
 
 

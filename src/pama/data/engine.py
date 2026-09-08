@@ -1,6 +1,6 @@
 import asyncio
 from functools import wraps
-from typing import Callable, Coroutine, Any
+from typing import Callable, Coroutine, Any, ParamSpec, TypeVar
 
 from sqlalchemy.exc import ArgumentError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
@@ -11,6 +11,8 @@ from pama.exceptions.database import DatabaseError
 from pama.settings.settings import config
 from pama.data.tables import *
 
+P = ParamSpec('P')
+R = TypeVar('R')
 
 engine: AsyncEngine | None = None  # = create_async_engine(url=config.database_url, **config.database_engine_kw)
 async_session: async_sessionmaker[AsyncSession | Any] | None = None  # = async_sessionmaker(engine, expire_on_commit=False)
@@ -38,7 +40,7 @@ def with_session(final_autocommit: bool = False):
     :raise DatabaseError: If a problem with database occurs.
     """
 
-    def decorator(sessioned_function: Callable[..., Coroutine[Any, Any, Any]]):
+    def decorator(sessioned_function: Callable[P, Coroutine[Any, Any, R]]) -> Callable[..., Coroutine[Any, Any, R]]:
         """
         Gives session context to the decorated coroutine.
         The first argument of the decorated coroutine will be ``session: AsyncSession``.
@@ -47,7 +49,7 @@ def with_session(final_autocommit: bool = False):
         """
 
         @wraps(sessioned_function)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs) -> Coroutine[Any, Any, R]:
             async with async_session() as session:
                 #try:
                     if final_autocommit:
