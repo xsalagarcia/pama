@@ -14,6 +14,8 @@ Checkout `pyproject.toml` `[project.scripts]` and `[project.gui-scripts]` sectio
  
 CLI coming from `pama/__init__.py`. run `pama` with args.
 
+Typing passwords / keys at cli persist at shell history. Take care, use environment variables or enter keys during script execution·
+
 ### GUI With tkinter
 
 Package `tkinter_GUI` has a secondary daemon thread used for async calls to service - database. Other GUIs doesn't need this.
