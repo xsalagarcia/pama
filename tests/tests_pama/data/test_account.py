@@ -1,6 +1,3 @@
-import os
-os.environ["PAMAN_ENVIRONMENT"] = "test"
-
 import asyncio
 import unittest
 
@@ -15,6 +12,18 @@ class TestAccount(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         await restart_db()
+
+    @staticmethod
+    async def _create_test_account() -> Account:
+        account = Account(
+            name="test name",
+            comments="test comments",
+            url="test url",
+            passw=b"some test bytes"
+        )
+        await data.create_account(account=account)
+        return account
+
     async def test_create_account(self):
         account = Account(name="test name", comments="test comments", url="test url", passw=b"some test bytes")
         self.assertTrue(inspect(account).transient)
@@ -22,10 +31,9 @@ class TestAccount(unittest.IsolatedAsyncioTestCase):
         await data.create_account(account=account)
         self.assertFalse(inspect(account).transient)
         self.assertTrue(inspect(account).detached)
-        return account
 
     async def test_update_account(self):
-        account = await self.test_create_account()
+        account = await self._create_test_account()
 
         await asyncio.sleep(1)  # 1s precision for last_updated
         account_update = AccountUpdate(id=account.id, name="changed name")
@@ -36,7 +44,7 @@ class TestAccount(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(inspect(updated_account).detached)
 
     async def test_remove_account(self):
-        account = await self.test_create_account()
+        account = await self._create_test_account()
 
         self.assertEqual(await data.remove_account(account_id=account.id), 1)
         self.assertEqual(await data.remove_account(account_id=account.id), 0)
