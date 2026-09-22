@@ -5,6 +5,7 @@ from pama import tkinter_UI
 from pama.exceptions.service import ServiceError
 from pama.models.account import Account
 from pama.service import account as service
+from pama.tkinter_UI.components.password_generator_dialog import PasswordGeneratorDialog
 from pama.tkinter_UI.validators import validators
 
 
@@ -65,7 +66,8 @@ class NewAccountDialog(tk.Toplevel):
         self._pw_entry_2 = ttk.Entry(frame_form, textvariable=self._account_pw_c, show="*")
         self._pw_entry_2.grid(row=4, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
 
-        ttk.Button(frame_form, text="Random PW").grid(row=5, column=0, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
+        ttk.Button(frame_form, text="Random PW",
+                   command=self._show_pw_generator).grid(row=5, column=0, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
         ttk.Checkbutton(frame_form, variable=self._is_pw_visible, offvalue=False, onvalue=True, text="Show PW",
                         command=self._show_pw
                         ).grid(row=5, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD)
@@ -75,7 +77,7 @@ class NewAccountDialog(tk.Toplevel):
 
         ttk.Button(frame_buttons, text="OK", command=self._ok).grid(row=0, column=0, padx=tkinter_UI.PAD,
                                                                     pady=tkinter_UI.PAD, sticky=(tk.E, tk.W))
-        ttk.Button(frame_buttons, text="Cancel").grid(row=0, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD,
+        ttk.Button(frame_buttons, text="Cancel", command=self._cancel).grid(row=0, column=1, padx=tkinter_UI.PAD, pady=tkinter_UI.PAD,
                                                       sticky=(tk.E, tk.W))
 
         self.protocol("WM_DELETE_WINDOW", self._cancel)
@@ -108,3 +110,14 @@ class NewAccountDialog(tk.Toplevel):
         else:
             self._pw_entry.config(show="*")
             self._pw_entry_2.config(show="*")
+
+    def _show_pw_generator(self):
+        """
+        Show password generator dialog.
+        :return:
+        """
+        pw_generator_dialog = PasswordGeneratorDialog(self)
+        pw_generator_dialog.wait_window()
+        if pw_generator_dialog.result is not None:
+            self._account_pw.set(pw_generator_dialog.result)
+            self._account_pw_c.set(pw_generator_dialog.result)
