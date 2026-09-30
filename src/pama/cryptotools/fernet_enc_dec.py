@@ -1,8 +1,12 @@
 import base64
 import os
 
+import cryptography
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
+
+from pama import ServiceError
+
 
 class FernetEncDecrypt:
     """
@@ -21,5 +25,8 @@ class FernetEncDecrypt:
         return self.f.encrypt(plaintext)
 
     def decrypt(self, data: bytes) -> bytes:
-        return self.f.decrypt(data)
+        try:
+            return self.f.decrypt(data)
+        except cryptography.fernet.InvalidToken:
+            raise ServiceError("Invalid token")
 

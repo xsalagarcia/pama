@@ -2,7 +2,7 @@ import asyncio
 from tkinter import ttk, messagebox
 import tkinter as tk
 
-from pama import tkinter_UI
+from pama import tkinter_UI, ServiceError
 from pama.models.account import Account, AccountUpdate
 from pama.tkinter_UI.components.new_account_dialog import NewAccountDialog
 from pama.tkinter_UI.validators import validators
@@ -148,8 +148,10 @@ class AccountFrame(ttk.Frame):
         :return:
         """
         self.master.clipboard_clear()
-        self.master.clipboard_append(service.enc_dec.decrypt(self.account.passw).decode("utf-8"))
-
+        try:
+            self.master.clipboard_append(service.enc_dec.decrypt(self.account.passw).decode("utf-8"))
+        except ServiceError as e:
+            messagebox.showerror(title="Error", message=e.msg)
     def filter_with(self, filter: str):
         """
         Show or not the component.
