@@ -5,6 +5,7 @@ import unittest
 from cryptography.fernet import InvalidToken
 
 from pama.cryptotools import fernet_enc_dec
+from pama.exceptions.cryptotools import CryptoError
 
 
 class TestFernetEncDec(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestFernetEncDec(unittest.TestCase):
         # And use aes_cypher for decrypt
         self.assertEqual(enc_dec.decrypt(cyphered).decode("utf-8"), text)
 
-        with self.assertRaises(InvalidToken):
+        with self.assertRaises(CryptoError):
             other_enc_dec.decrypt(cyphered).decode("utf-8")
 
 

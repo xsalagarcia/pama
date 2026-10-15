@@ -149,7 +149,7 @@ class AccountFrame(ttk.Frame):
         """
         self.master.clipboard_clear()
         try:
-            self.master.clipboard_append(service.enc_dec.decrypt(self.account.passw).decode("utf-8"))
+            self.master.clipboard_append(service.decode_pw(self.account.passw))
         except ServiceError as e:
             messagebox.showerror(title="Error", message=e.msg)
     def filter_with(self, filter: str):

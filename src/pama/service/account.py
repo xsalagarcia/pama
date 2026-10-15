@@ -3,6 +3,7 @@ import hashlib
 from typing import Sequence
 
 from pama.cryptotools import fernet_enc_dec
+from pama.exceptions.cryptotools import CryptoError
 from pama.exceptions.service import ServiceError
 from pama.models.account import Account, AccountUpdate
 from pama.data import account as data
@@ -37,7 +38,10 @@ def set_encoder(key: str, salt: bytes):
 
 def decode_pw(encoded: bytes) -> str:
     if enc_dec is not None:
-        return enc_dec.decrypt(encoded).decode("utf-8")
+        try:
+            return enc_dec.decrypt(encoded).decode("utf-8")
+        except CryptoError:
+            raise ServiceError(msg="Review master key!.")
     else:
         raise ServiceError(msg="Enc / Dec is not set.")
 

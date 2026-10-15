@@ -5,7 +5,7 @@ import cryptography
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 
-from pama import ServiceError
+from pama.exceptions.cryptotools import CryptoError
 
 
 class FernetEncDecrypt:
@@ -22,11 +22,14 @@ class FernetEncDecrypt:
         self.f = Fernet(base64.urlsafe_b64encode(kdf.derive(key)))
 
     def encrypt(self, plaintext: bytes) -> bytes:
-        return self.f.encrypt(plaintext)
+        try:
+            return self.f.encrypt(plaintext)
+        except cryptography.fernet.InvalidToken:
+            raise CryptoError("Invalid token")
 
     def decrypt(self, data: bytes) -> bytes:
         try:
             return self.f.decrypt(data)
         except cryptography.fernet.InvalidToken:
-            raise ServiceError("Invalid token")
+            raise CryptoError("Invalid token")
 
